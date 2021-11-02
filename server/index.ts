@@ -1,7 +1,7 @@
-import { registerTSPaths } from './server/helpers/register-ts-paths'
+import { registerTSPaths } from './helpers/register-ts-paths'
 registerTSPaths()
 
-import { isTestInstance } from './server/helpers/core-utils'
+import { isTestInstance } from './helpers/core-utils'
 if (isTestInstance()) {
   require('source-map-support').install()
 }
@@ -22,12 +22,12 @@ process.title = 'peertube'
 const app = express().disable("x-powered-by")
 
 // ----------- Core checker -----------
-import { checkMissedConfig, checkFFmpeg, checkNodeVersion } from './server/initializers/checker-before-init'
+import { checkMissedConfig, checkFFmpeg, checkNodeVersion } from './initializers/checker-before-init'
 
 // Do not use barrels because we don't want to load all modules here (we need to initialize database first)
-import { CONFIG } from './server/initializers/config'
-import { API_VERSION, FILES_CACHE, WEBSERVER, loadLanguages } from './server/initializers/constants'
-import { logger } from './server/helpers/logger'
+import { CONFIG } from './initializers/config'
+import { API_VERSION, FILES_CACHE, WEBSERVER, loadLanguages } from './initializers/constants'
+import { logger } from './helpers/logger'
 
 const missed = checkMissedConfig()
 if (missed.length !== 0) {
@@ -43,7 +43,7 @@ checkFFmpeg(CONFIG)
 
 checkNodeVersion()
 
-import { checkConfig, checkActivityPubUrls, checkFFmpegVersion } from './server/initializers/checker-after-init'
+import { checkConfig, checkActivityPubUrls, checkFFmpegVersion } from './initializers/checker-after-init'
 
 const errorMessage = checkConfig()
 if (errorMessage !== null) {
@@ -54,7 +54,7 @@ if (errorMessage !== null) {
 app.set('trust proxy', CONFIG.TRUST_PROXY)
 
 // Security middleware
-import { baseCSP } from './server/middlewares/csp'
+import { baseCSP } from './middlewares/csp'
 
 if (CONFIG.CSP.ENABLED) {
   app.use(baseCSP)
@@ -62,17 +62,17 @@ if (CONFIG.CSP.ENABLED) {
 
 if (CONFIG.SECURITY.FRAMEGUARD.ENABLED) {
   app.use(frameguard({
-    action: 'deny' // we only allow it for /videos/embed, see server/controllers/client.ts
+    action: 'deny' // we only allow it for /videos/embed, see controllers/client.ts
   }))
 }
 
 // ----------- Database -----------
 
 // Initialize database and models
-import { initDatabaseModels, checkDatabaseConnectionOrDie } from './server/initializers/database'
+import { initDatabaseModels, checkDatabaseConnectionOrDie } from './initializers/database'
 checkDatabaseConnectionOrDie()
 
-import { migrate } from './server/initializers/migrator'
+import { migrate } from './initializers/migrator'
 migrate()
   .then(() => initDatabaseModels(false))
   .then(() => startApplication())
@@ -85,10 +85,10 @@ migrate()
 loadLanguages()
 
 // ----------- PeerTube modules -----------
-import { installApplication } from './server/initializers/installer'
-import { Emailer } from './server/lib/emailer'
-import { JobQueue } from './server/lib/job-queue'
-import { VideosPreviewCache, VideosCaptionCache } from './server/lib/files-cache'
+import { installApplication } from './initializers/installer'
+import { Emailer } from './lib/emailer'
+import { JobQueue } from './lib/job-queue'
+import { VideosPreviewCache, VideosCaptionCache } from './lib/files-cache'
 import {
   activityPubRouter,
   apiRouter,
@@ -104,31 +104,31 @@ import {
   createWebsocketTrackerServer,
   botsRouter,
   downloadRouter
-} from './server/controllers'
-import { advertiseDoNotTrack } from './server/middlewares/dnt'
-import { apiFailMiddleware } from './server/middlewares/error'
-import { Redis } from './server/lib/redis'
-import { ActorFollowScheduler } from './server/lib/schedulers/actor-follow-scheduler'
-import { RemoveOldViewsScheduler } from './server/lib/schedulers/remove-old-views-scheduler'
-import { RemoveOldJobsScheduler } from './server/lib/schedulers/remove-old-jobs-scheduler'
-import { UpdateVideosScheduler } from './server/lib/schedulers/update-videos-scheduler'
-import { YoutubeDlUpdateScheduler } from './server/lib/schedulers/youtube-dl-update-scheduler'
-import { VideosRedundancyScheduler } from './server/lib/schedulers/videos-redundancy-scheduler'
-import { RemoveOldHistoryScheduler } from './server/lib/schedulers/remove-old-history-scheduler'
-import { AutoFollowIndexInstances } from './server/lib/schedulers/auto-follow-index-instances'
-import { RemoveDanglingResumableUploadsScheduler } from './server/lib/schedulers/remove-dangling-resumable-uploads-scheduler'
-import { VideoViewsBufferScheduler } from './server/lib/schedulers/video-views-buffer-scheduler'
-import { isHTTPSignatureDigestValid } from './server/helpers/peertube-crypto'
-import { PeerTubeSocket } from './server/lib/peertube-socket'
-import { updateStreamingPlaylistsInfohashesIfNeeded } from './server/lib/hls'
-import { PluginsCheckScheduler } from './server/lib/schedulers/plugins-check-scheduler'
-import { PeerTubeVersionCheckScheduler } from './server/lib/schedulers/peertube-version-check-scheduler'
-import { Hooks } from './server/lib/plugins/hooks'
-import { PluginManager } from './server/lib/plugins/plugin-manager'
-import { LiveManager } from './server/lib/live'
-import { HttpStatusCode } from './shared/models/http/http-error-codes'
-import { VideosTorrentCache } from '@server/lib/files-cache/videos-torrent-cache'
-import { ServerConfigManager } from '@server/lib/server-config-manager'
+} from './controllers'
+import { advertiseDoNotTrack } from './middlewares/dnt'
+import { apiFailMiddleware } from './middlewares/error'
+import { Redis } from './lib/redis'
+import { ActorFollowScheduler } from './lib/schedulers/actor-follow-scheduler'
+import { RemoveOldViewsScheduler } from './lib/schedulers/remove-old-views-scheduler'
+import { RemoveOldJobsScheduler } from './lib/schedulers/remove-old-jobs-scheduler'
+import { UpdateVideosScheduler } from './lib/schedulers/update-videos-scheduler'
+import { YoutubeDlUpdateScheduler } from './lib/schedulers/youtube-dl-update-scheduler'
+import { VideosRedundancyScheduler } from './lib/schedulers/videos-redundancy-scheduler'
+import { RemoveOldHistoryScheduler } from './lib/schedulers/remove-old-history-scheduler'
+import { AutoFollowIndexInstances } from './lib/schedulers/auto-follow-index-instances'
+import { RemoveDanglingResumableUploadsScheduler } from './lib/schedulers/remove-dangling-resumable-uploads-scheduler'
+import { VideoViewsBufferScheduler } from './lib/schedulers/video-views-buffer-scheduler'
+import { isHTTPSignatureDigestValid } from './helpers/peertube-crypto'
+import { PeerTubeSocket } from './lib/peertube-socket'
+import { updateStreamingPlaylistsInfohashesIfNeeded } from './lib/hls'
+import { PluginsCheckScheduler } from './lib/schedulers/plugins-check-scheduler'
+import { PeerTubeVersionCheckScheduler } from './lib/schedulers/peertube-version-check-scheduler'
+import { Hooks } from './lib/plugins/hooks'
+import { PluginManager } from './lib/plugins/plugin-manager'
+import { LiveManager } from './lib/live'
+import { HttpStatusCode } from '../shared/models/http/http-error-codes'
+import { VideosTorrentCache } from './lib/files-cache/videos-torrent-cache'
+import { ServerConfigManager } from './lib/server-config-manager'
 import { VideoViews } from '@server/lib/video-views'
 
 // ----------- Command line -----------

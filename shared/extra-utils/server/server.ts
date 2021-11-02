@@ -1,8 +1,7 @@
 import { ChildProcess, fork } from 'child_process'
 import { copy } from 'fs-extra'
 import { join } from 'path'
-import { root } from '@server/helpers/core-utils'
-import { randomInt } from '@shared/core-utils'
+import { root, randomInt } from '@shared/core-utils'
 import { Video, VideoChannel, VideoCreateResult, VideoDetails } from '../../models/videos'
 import { BulkCommand } from '../bulk'
 import { CLICommand } from '../cli'
@@ -221,7 +220,7 @@ export class PeerTubeServer {
     return new Promise<void>((res, rej) => {
       const self = this
 
-      this.app = fork(join(root(), 'dist', 'server.js'), options.peertubeArgs || [], forkOptions)
+      this.app = fork(join(root(), 'dist', 'server/index.js'), options.peertubeArgs || [], forkOptions)
 
       const onPeerTubeExit = () => rej(new Error('Process exited'))
       const onParentExit = () => {
