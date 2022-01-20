@@ -1,4 +1,4 @@
-import { PluginType } from '../../plugin.type'
+import { PluginType, SettingEntries } from '@shared/models'
 
 export interface PeerTubePlugin {
   name: string
@@ -10,7 +10,7 @@ export interface PeerTubePlugin {
   peertubeEngine: string
   description: string
   homepage: string
-  settings: { [ name: string ]: string }
+  settings: SettingEntries
   createdAt: Date
   updatedAt: Date
 }

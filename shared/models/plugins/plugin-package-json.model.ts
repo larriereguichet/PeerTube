@@ -1,4 +1,4 @@
-import { PluginClientScope } from './client/plugin-client-scope.type'
+import { PluginClientScope } from '@shared/models'
 
 export type PluginTranslationPathsJSON = {
   [ locale: string ]: string
