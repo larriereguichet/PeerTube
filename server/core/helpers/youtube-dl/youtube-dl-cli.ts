@@ -1,13 +1,11 @@
 import { execa, NodeOptions as ExecaNodeOptions } from 'execa'
 import { ensureDir, pathExists } from 'fs-extra/esm'
-import { writeFile } from 'fs/promises'
-import { OptionsOfBufferResponseBody } from 'got'
 import { dirname, join } from 'path'
 import { VideoResolution, VideoResolutionType } from '@peertube/peertube-models'
 import { CONFIG } from '@server/initializers/config.js'
+import { updateBinary } from '@server/helpers/binary.js'
 import { logger, loggerTagsFactory } from '../logger.js'
 import { getProxy, isProxyEnabled } from '../proxy.js'
-import { isBinaryResponse, peertubeGot } from '../requests.js'
 
 const lTags = loggerTagsFactory('youtube-dl')
 
@@ -26,46 +24,14 @@ export class YoutubeDLCLI {
   }
 
   static async updateYoutubeDLBinary () {
-    const url = CONFIG.IMPORT.VIDEOS.HTTP.YOUTUBE_DL_RELEASE.URL
-
-    logger.info('Updating youtubeDL binary from %s.', url, lTags())
-
-    const gotOptions: OptionsOfBufferResponseBody = {
-      context: { bodyKBLimit: 20_000 },
-      responseType: 'buffer' as 'buffer'
-    }
-
-    if (process.env.YOUTUBE_DL_DOWNLOAD_BEARER_TOKEN) {
-      gotOptions.headers = {
-        authorization: 'Bearer ' + process.env.YOUTUBE_DL_DOWNLOAD_BEARER_TOKEN
-      }
-    }
-
-    try {
-      let gotResult = await peertubeGot(url, gotOptions)
-
-      if (!isBinaryResponse(gotResult)) {
-        const json = JSON.parse(gotResult.body.toString())
-        const latest = json.filter(release => release.prerelease === false)[0]
-        if (!latest) throw new Error('Cannot find latest release')
-
-        const releaseName = CONFIG.IMPORT.VIDEOS.HTTP.YOUTUBE_DL_RELEASE.NAME
-        const releaseAsset = latest.assets.find(a => a.name === releaseName)
-        if (!releaseAsset) throw new Error(`Cannot find appropriate release with name ${releaseName} in release assets`)
-
-        gotResult = await peertubeGot(releaseAsset.browser_download_url, gotOptions)
-      }
-
-      if (!isBinaryResponse(gotResult)) {
-        throw new Error('Not a binary response')
-      }
-
-      await writeFile(youtubeDLBinaryPath, gotResult.body)
-
-      logger.info('youtube-dl updated %s.', youtubeDLBinaryPath, lTags())
-    } catch (err) {
-      logger.error('Cannot update youtube-dl from %s.', url, { err, ...lTags() })
-    }
+    return updateBinary(
+      {
+        name: CONFIG.IMPORT.VIDEOS.HTTP.YOUTUBE_DL_RELEASE.NAME,
+        url: CONFIG.IMPORT.VIDEOS.HTTP.YOUTUBE_DL_RELEASE.URL
+      },
+      youtubeDLBinaryPath,
+      process.env.YOUTUBE_DL_DOWNLOAD_BEARER_TOKEN
+    )
   }
 
   static getYoutubeDLVideoFormat (enabledResolutions: VideoResolutionType[], useBestFormat: boolean) {
