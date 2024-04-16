@@ -6,7 +6,8 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@tests/*": [ "./src/*" ],
-      "@server/*": [ "../../server/core/*" ]
+      "@server/*": [ "../../server/core/*" ],
+      "@peertube/peertube-transcription": [ "../transcription" ]
     }
   },
   "references": [

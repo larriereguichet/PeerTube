@@ -41,9 +41,11 @@
 // .'PyTorch' | 'GGML' | 'ONNX' // CoreML, OpenVino, Scikit-Learn, TensorFlow/Keras, PySpark
 // https://towardsdatascience.com/guide-to-file-formats-for-machine-learning-columnar-training-inferencing-and-the-feature-store-2e0c3d18d4f9
 
+export type ModelFormat = 'PyTorch' | 'GGML' | 'ONNX' | 'CTranslate2' // CoreML, OpenVino, Scikit-Learn, TensorFlow/Keras, PySpark
+
 export abstract class TranscriptionModel {
   name: string
-  format?: 'PyTorch' | 'GGML' | 'ONNX' // CoreML, OpenVino, Scikit-Learn, TensorFlow/Keras, PySpark
+  format?: ModelFormat
   path?: string
   url?: string
 
