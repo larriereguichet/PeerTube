@@ -1,10 +1,14 @@
-import { join } from 'path'
+import assert from 'node:assert'
+import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { rename } from 'node:fs/promises'
 import { $ } from 'execa'
 import { TranscriptionModel } from '../../transcription-model.js'
 import { Transcript, TranscriptFormat } from '../../transcript.js'
 import { AbstractTranscriber } from '../../abstract-transcriber.js'
+import { getFileInfo } from '../../file-utils.js'
 
-export class FasterWhisperTranscriber extends AbstractTranscriber {
+export class WhisperTimestampedTranscriber extends AbstractTranscriber {
   async transcribe (
     mediaFilePath: string,
     model: TranscriptionModel,
@@ -12,8 +16,8 @@ export class FasterWhisperTranscriber extends AbstractTranscriber {
     format: TranscriptFormat = 'vtt'
   ): Promise<Transcript> {
     const $$ = $({ verbose: true })
-
-    await $$`whisper ${[
+    const { baseName, name } = getFileInfo(mediaFilePath)
+    await $$`whisper_timestamped ${[
       mediaFilePath,
       '--model',
       model.name,
@@ -23,11 +27,16 @@ export class FasterWhisperTranscriber extends AbstractTranscriber {
       this.transcriptDirectory
     ]}`
 
+    const internalTranscriptPath = join(this.transcriptDirectory, `${name}.${format}`)
+    const transcriptPath = join(this.transcriptDirectory, `${baseName}.${format}`)
+    assert(existsSync(internalTranscriptPath), '')
+
+    await rename(internalTranscriptPath, transcriptPath)
     await $$`ls ${this.transcriptDirectory}`
 
     return {
       language,
-      path: join(this.transcriptDirectory, `test.${format}`),
+      path: transcriptPath,
       format
     }
   }

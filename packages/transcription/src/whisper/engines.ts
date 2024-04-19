@@ -11,16 +11,16 @@ export const engines: TranscriptionEngine[] = [
     license : 'MIT',
     supportedModelFormats: [ 'ONNX' ]
   },
-  {
-    name : 'transformers',
-    description : 'High-performance inference of OpenAI\'s Whisper automatic speech recognition model',
-    type: 'binary',
-    language : 'python',
-    requirements : [],
-    forgeURL : '',
-    license : '',
-    supportedModelFormats: [ 'ONNX' ]
-  },
+  // {
+  //   name : 'transformers',
+  //   description : 'High-performance inference of OpenAI\'s Whisper automatic speech recognition model',
+  //   type: 'binary',
+  //   language : 'python',
+  //   requirements : [],
+  //   forgeURL : '',
+  //   license : '',
+  //   supportedModelFormats: [ 'ONNX' ]
+  // },
   {
     name: 'openai-whisper',
     description: 'High-performance inference of OpenAI\'s Whisper automatic speech recognition model',
@@ -34,6 +34,17 @@ export const engines: TranscriptionEngine[] = [
   },
   {
     name: 'whisper-ctranslate2',
+    description: '',
+    requirements: [ 'python' ],
+    language: 'python',
+    type: 'binary',
+    binary: 'whisper-ctranslate2',
+    forgeURL: 'https://github.com/openai/whisper',
+    license: 'MIT',
+    supportedModelFormats: [ 'CTranslate2' ]
+  },
+  {
+    name: 'whisper-timestamped',
     description: '',
     requirements: [ 'python' ],
     language: 'python',
