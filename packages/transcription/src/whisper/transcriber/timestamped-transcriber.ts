@@ -15,6 +15,8 @@ export class WhisperTimestampedTranscriber extends AbstractTranscriber {
     language: string,
     format: TranscriptFormat = 'vtt'
   ): Promise<Transcript> {
+    this.createPerformanceMark()
+
     const $$ = $({ verbose: true })
     const { baseName, name } = getFileInfo(mediaFilePath)
     await $$`whisper_timestamped ${[
@@ -30,9 +32,9 @@ export class WhisperTimestampedTranscriber extends AbstractTranscriber {
     const internalTranscriptPath = join(this.transcriptDirectory, `${name}.${format}`)
     const transcriptPath = join(this.transcriptDirectory, `${baseName}.${format}`)
     assert(existsSync(internalTranscriptPath), '')
-
     await rename(internalTranscriptPath, transcriptPath)
-    await $$`ls ${this.transcriptDirectory}`
+
+    this.measurePerformanceMark()
 
     return {
       language,

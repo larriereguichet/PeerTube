@@ -4,7 +4,8 @@ import { expect } from 'chai'
 import { existsSync } from 'node:fs'
 import { rm, mkdir, readFile } from 'node:fs/promises'
 import { buildAbsoluteFixturePath, root } from '@peertube/peertube-node-utils'
-import { transcriberFactory } from '@peertube/peertube-transcription'
+import { toHumanReadable, transcriberFactory } from '@peertube/peertube-transcription'
+import { performance, PerformanceObserver } from 'node:perf_hooks'
 
 describe('Transcribers', function () {
   const transcriptDirectory = join(root(), 'test-transcript')
@@ -17,6 +18,13 @@ describe('Transcribers', function () {
 
   before(async function () {
     await mkdir(transcriptDirectory, { recursive: true })
+
+    const performanceObserver = new PerformanceObserver((items) => {
+      items
+        .getEntries()
+        .forEach((entry) => console.log(`Transcription ${entry.name} took ${toHumanReadable(entry.duration)}`))
+    })
+    performanceObserver.observe({ type: 'measure' })
   })
 
   transcribers.forEach(function (transcriberName) {
@@ -55,5 +63,6 @@ describe('Transcribers', function () {
 
   after(async function () {
     await rm(transcriptDirectory, { recursive: true, force: true })
+    performance.clearMarks()
   })
 })

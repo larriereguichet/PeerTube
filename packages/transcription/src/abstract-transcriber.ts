@@ -5,6 +5,9 @@ import { TranscriptionEngine } from './transcription-engine.js'
 import { TranscriptionModel } from './transcription-model.js'
 import { Transcript, TranscriptFormat } from './transcript.js'
 import { existsSync } from 'fs'
+import { PerformanceObserver } from 'node:perf_hooks'
+import short from 'short-uuid'
+import assert from 'node:assert'
 
 export abstract class AbstractTranscriber {
   public static DEFAULT_TRANSCRIPT_DIRECTORY = join(root(), 'dist', 'transcripts')
@@ -12,15 +15,19 @@ export abstract class AbstractTranscriber {
   engine: TranscriptionEngine
   logger: Logger
   transcriptDirectory: string
+  performanceObserver?: PerformanceObserver
+  runId?: string
 
   constructor (
     engine: TranscriptionEngine,
     logger: Logger,
-    transcriptDirectory: string = AbstractTranscriber.DEFAULT_TRANSCRIPT_DIRECTORY
+    transcriptDirectory: string = AbstractTranscriber.DEFAULT_TRANSCRIPT_DIRECTORY,
+    performanceObserver?: PerformanceObserver
   ) {
     this.engine = engine
     this.logger = logger
     this.transcriptDirectory = transcriptDirectory
+    this.performanceObserver = performanceObserver
   }
 
   detectLanguage () {
@@ -33,6 +40,45 @@ export abstract class AbstractTranscriber {
 
   supports (model: TranscriptionModel) {
     return model.format === 'PyTorch'
+  }
+
+  createPerformanceMark () {
+    this.runId = `${short.uuid()}-${this.engine.name}`
+    performance.mark(this.getStartPerformanceMarkName())
+  }
+
+  measurePerformanceMark () {
+    try {
+      performance.mark(this.getEndPerformanceMarkName())
+      performance.measure(
+        this.runId,
+        this.getStartPerformanceMarkName(),
+        this.getEndPerformanceMarkName()
+      )
+    } catch (e) {
+      this.logger.log({ level: 'error', message: e })
+    }
+  }
+
+  getStartPerformanceMarkName () {
+    assert(!!this.runId, 'Each transcription run should have an id.')
+
+    return `${this.runId}-started`
+  }
+
+  getEndPerformanceMarkName () {
+    assert(!!this.runId, 'Each transcription run should have an id.')
+
+    return `${this.runId}-ended`
+  }
+
+  perf () {
+    // const transcriptionPerformanceObserver = new PerformanceObserver((items) => {
+    //   items
+    //     .getEntries()
+    //     .forEach((entry) => logger.debug(`Transcription n°${entry.name} took ${toHumanReadable(entry.duration)}`, entry))
+    //   performance.clearMarks()
+    // })
   }
 
   abstract transcribe (mediaFilePath: string, model: TranscriptionModel, language: string, format: TranscriptFormat): Promise<Transcript>

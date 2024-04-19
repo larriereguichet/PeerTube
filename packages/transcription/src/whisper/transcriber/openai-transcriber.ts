@@ -12,12 +12,13 @@ export class OpenaiTranscriber extends AbstractTranscriber {
     language: string,
     format: TranscriptFormat = 'vtt'
   ): Promise<Transcript> {
+    this.createPerformanceMark()
     // Shall we run the command with `{ shell: true }` to get the same error as in sh ?
     // ex: ENOENT => Command not found
     const $$ = $({ verbose: true })
     const { baseName } = getFileInfo(mediaFilePath)
 
-    const { stdout } = await $$`whisper ${[
+    await $$`whisper ${[
       mediaFilePath,
       '--model',
       model.name,
@@ -26,10 +27,8 @@ export class OpenaiTranscriber extends AbstractTranscriber {
       '--output_dir',
       this.transcriptDirectory
     ]}`
-    console.log(stdout)
 
-    const { stdout: lsStdout } = await $$`ls ${this.transcriptDirectory}`
-    console.log(lsStdout)
+    this.measurePerformanceMark()
 
     return {
       language,
