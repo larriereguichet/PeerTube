@@ -12,6 +12,7 @@ export class Ctranslate2Transcriber extends AbstractTranscriber {
     language: string,
     format: TranscriptFormat = 'vtt'
   ): Promise<Transcript> {
+    this.createPerformanceMark()
     const $$ = $({ verbose: true })
     const { baseName } = getFileInfo(mediaFilePath)
 
@@ -25,7 +26,7 @@ export class Ctranslate2Transcriber extends AbstractTranscriber {
       this.transcriptDirectory
     ]}`
 
-    await $$`ls ${this.transcriptDirectory}`
+    this.measurePerformanceMark()
 
     return {
       language,
