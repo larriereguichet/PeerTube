@@ -8,7 +8,7 @@ import { OpenaiTranscriber } from '@peertube/peertube-transcription'
 
 config.truncateThreshold = 0
 
-describe('Open AI Whisper transcriber', function () {
+describe('Linto timestamped Whisper transcriber', function () {
   const transcriptDirectory = join(root(), 'test-transcript')
   const expectedVttTranscriptPath = join(transcriptDirectory, 'video_short.vtt')
 
@@ -19,7 +19,7 @@ describe('Open AI Whisper transcriber', function () {
   it('Should transcribe a media file', async function () {
     const transcriber = new OpenaiTranscriber(
       {
-        name: 'openai-whisper',
+        name: 'timestamped-whisper',
         requirements: [],
         language: '',
         type: 'binary',
