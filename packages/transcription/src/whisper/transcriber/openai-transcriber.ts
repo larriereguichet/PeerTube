@@ -8,8 +8,8 @@ import { getFileInfo } from '../../file-utils.js'
 export class OpenaiTranscriber extends AbstractTranscriber {
   async transcribe (
     mediaFilePath: string,
-    model: TranscriptionModel,
-    language: string,
+    model: TranscriptionModel = { name: 'tiny' },
+    language: string = 'en',
     format: TranscriptFormat = 'vtt'
   ): Promise<Transcript> {
     this.createPerformanceMark()
@@ -18,14 +18,16 @@ export class OpenaiTranscriber extends AbstractTranscriber {
     const $$ = $({ verbose: true })
     const { baseName } = getFileInfo(mediaFilePath)
 
-    await $$`whisper ${[
+    await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
       model.name,
       '--output_format',
       'all',
       '--output_dir',
-      this.transcriptDirectory
+      this.transcriptDirectory,
+      '--language',
+      language
     ]}`
 
     this.measurePerformanceMark()

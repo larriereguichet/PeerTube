@@ -5,10 +5,10 @@ import { rename } from 'node:fs/promises'
 import { $ } from 'execa'
 import { TranscriptionModel } from '../../transcription-model.js'
 import { Transcript, TranscriptFormat } from '../../transcript.js'
-import { AbstractTranscriber } from '../../abstract-transcriber.js'
 import { getFileInfo } from '../../file-utils.js'
+import { OpenaiTranscriber } from './openai-transcriber.js'
 
-export class WhisperTimestampedTranscriber extends AbstractTranscriber {
+export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
   async transcribe (
     mediaFilePath: string,
     model: TranscriptionModel,
@@ -19,7 +19,7 @@ export class WhisperTimestampedTranscriber extends AbstractTranscriber {
 
     const $$ = $({ verbose: true })
     const { baseName, name } = getFileInfo(mediaFilePath)
-    await $$`whisper_timestamped ${[
+    await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
       model.name,
@@ -31,7 +31,8 @@ export class WhisperTimestampedTranscriber extends AbstractTranscriber {
 
     const internalTranscriptPath = join(this.transcriptDirectory, `${name}.${format}`)
     const transcriptPath = join(this.transcriptDirectory, `${baseName}.${format}`)
-    assert(existsSync(internalTranscriptPath), '')
+    // Whisper timestamped is supposed to output file with the video file extension ex: video.mp4.vtt
+    assert(existsSync(internalTranscriptPath), `${internalTranscriptPath} file doesn't exist.`)
     await rename(internalTranscriptPath, transcriptPath)
 
     this.measurePerformanceMark()

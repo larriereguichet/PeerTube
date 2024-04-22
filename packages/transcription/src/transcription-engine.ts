@@ -6,11 +6,11 @@ import { ModelFormat } from './transcription-model.js'
 export interface TranscriptionEngine {
   name: string
   description?: string
-  language: string
+  language?: string
   requirements: string[]
   type: 'binary' | 'bindings' | 'ws'
-  binary?: string
-  license: string
+  binary: string
+  license?: string
   forgeURL?: string
   supportedModelFormats: ModelFormat[]
 

@@ -5,6 +5,7 @@ export const engines: TranscriptionEngine[] = [
     name : 'whisper-cpp',
     description : 'High-performance inference of OpenAI\'s Whisper automatic speech recognition model',
     type: 'binary',
+    binary: 'main',
     language : 'cpp',
     requirements : [],
     forgeURL : 'https://github.com/ggerganov/whisper.cpp',
@@ -49,7 +50,7 @@ export const engines: TranscriptionEngine[] = [
     requirements: [ 'python' ],
     language: 'python',
     type: 'binary',
-    binary: 'whisper-ctranslate2',
+    binary: 'whisper_timestamped',
     forgeURL: 'https://github.com/openai/whisper',
     license: 'MIT',
     supportedModelFormats: [ 'CTranslate2' ]
