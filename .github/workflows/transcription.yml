@@ -1,4 +1,4 @@
-name: Benchmark
+name: Transcription
 
 on:
   push:
