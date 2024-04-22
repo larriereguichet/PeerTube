@@ -19,3 +19,8 @@ const deepLearningFrameworks: DeepLearningFramework = [
   }
 ]
 ```
+
+
+What about the lifecycle of each transcriber ?
+- install => installer
+- update => udpater
