@@ -5,13 +5,13 @@ import { ModelFormat } from './transcription-model.js'
  */
 export interface TranscriptionEngine {
   name: string
-  description: string
+  description?: string
   language: string
   requirements: string[]
   type: 'binary' | 'bindings' | 'ws'
   binary?: string
   license: string
-  forgeURL: string
+  forgeURL?: string
   supportedModelFormats: ModelFormat[]
 
   // There could be a default models.

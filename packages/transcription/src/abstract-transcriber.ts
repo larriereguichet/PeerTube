@@ -1,13 +1,13 @@
-import { Logger } from 'winston'
-import { join } from 'path'
+import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { PerformanceObserver } from 'node:perf_hooks'
+import assert from 'node:assert'
+import { createLogger, Logger } from 'winston'
+import short from 'short-uuid'
 import { root } from '@peertube/peertube-node-utils'
 import { TranscriptionEngine } from './transcription-engine.js'
 import { TranscriptionModel } from './transcription-model.js'
 import { Transcript, TranscriptFormat } from './transcript.js'
-import { existsSync } from 'fs'
-import { PerformanceObserver } from 'node:perf_hooks'
-import short from 'short-uuid'
-import assert from 'node:assert'
 
 export abstract class AbstractTranscriber {
   public static DEFAULT_TRANSCRIPT_DIRECTORY = join(root(), 'dist', 'transcripts')
@@ -20,7 +20,7 @@ export abstract class AbstractTranscriber {
 
   constructor (
     engine: TranscriptionEngine,
-    logger: Logger,
+    logger: Logger = createLogger(),
     transcriptDirectory: string = AbstractTranscriber.DEFAULT_TRANSCRIPT_DIRECTORY,
     performanceObserver?: PerformanceObserver
   ) {
