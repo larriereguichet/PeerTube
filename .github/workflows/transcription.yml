@@ -21,9 +21,9 @@ jobs:
 
       - name: Install Python libraries
         run: |
-          pip install openai-whisper
-          pip install whisper-ctranslate2
-          pip install whisper-timestamped
+          pip3 install openai-whisper
+          pip3 install whisper-ctranslate2
+          pip3 install whisper-timestamped
 
       - name: Run transcription tests
         run: |
