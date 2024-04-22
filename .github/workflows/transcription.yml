@@ -27,4 +27,4 @@ jobs:
 
       - name: Run transcription tests
         run: |
-          npm run mocha -- --exit --bail packages/tests/src/transcription/whisper/transcriber/openai-transcriber.spec.ts
+          npm run mocha -- --exit --bail packages/tests/src/transcription/**/*.spec.ts
