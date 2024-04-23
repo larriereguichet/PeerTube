@@ -2,8 +2,9 @@ import { ModelFormat } from './transcription-model.js'
 
 /**
  * The engine, or framework.
+ *
  */
-export interface TranscriptionEngine {
+export class TranscriptionEngine {
   name: string
   description?: string
   language?: string
@@ -13,6 +14,10 @@ export interface TranscriptionEngine {
   license?: string
   forgeURL?: string
   supportedModelFormats: ModelFormat[]
+
+  constructor (parameters: TranscriptionEngine) {
+    Object.assign(this, parameters)
+  }
 
   // There could be a default models.
   // There could be a list of default models

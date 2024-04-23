@@ -21,9 +21,9 @@ export class OpenaiTranscriber extends AbstractTranscriber {
     await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
-      model.name,
+      model?.path || model.name,
       '--output_format',
-      'all',
+      format,
       '--output_dir',
       this.transcriptDirectory,
       '--language',

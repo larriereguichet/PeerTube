@@ -11,6 +11,7 @@ config.truncateThreshold = 0
 describe('Linto timestamped Whisper transcriber', function () {
   const transcriptDirectory = join(root(), 'test-transcript')
   const shortVideoPath = buildAbsoluteFixturePath('video_short.mp4')
+  const frVideoPath = buildAbsoluteFixturePath('transcription/communiquer-lors-dune-classe-transplantee.mp4')
   const transcriber = new WhisperTimestampedTranscriber(
     {
       name: 'whisper-timestamped',
@@ -84,18 +85,54 @@ you
 
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
-    expect(await readFile(transcript.path, 'utf8')).to.equal(`You
-  `)
+    expect(await readFile(transcript.path, 'utf8')).to.equal(`you
+`)
+  })
+
+  it('May transcribe a media file in french', async function () {
+    this.timeout(45000)
+    const transcript = await transcriber.transcribe(frVideoPath, { name: 'tiny' }, 'fr', 'txt')
+    expect(transcript).to.deep.equals({
+      path: join(transcriptDirectory, 'communiquer-lors-dune-classe-transplantee.txt'),
+      language: 'fr',
+      format: 'txt'
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
+    expect(await readFile(transcript.path, 'utf8')).to.equal(
+      `...
+Communiquez lors du ne class et transplanté.
+Utilisez les photos prises lors de cette classe pour raconter quotidiennement le seuil jour vécu.
+C'est le scénario P.D. à Goujit présenté par M.I.N.A.Voli,
+professeur en cycle 3 sur une école émenteur de Montpellier.
+La première application a utilisé ce ralame de Yatek.
+L'enseignant va alors transférer les différentes photos réalisés lors de la classe transplantée dans un dossier,
+spécifique pour que les élèves puissent le retrouver plus facilement.
+Il t'éleverce donc ses photos dans le dossier, dans le venté, dans la médiatèque de la classe.
+Pour terminer, il s'assure que le dossier soit bien ouvert aux utilisateurs afin que tout le monde puisse l'utiliser.
+Les élèves par la suite utiliseront le blog.
+À partir de leur note, il pourront se loi de par poste rédigène article dans le reinté.
+Ils illustront ses articles à l'aide des photos de commun numérique mise à n'accélier dans la même thé.
+Pour se faire, il pourront utiliser les dites ravences qui les renvèrent directement dans la médiatèque de la classe,
+où ils pourront retrouver le dossier créé par leur enseignon.
+Une fois leur article terminée, les élèves soumétront se lui-ci au professeur,
+qui pourra soit la noter pour correction ou le public.
+Ensuite, il pourront lire et commenter ce de leur camarade, ou répondre au commentaire de la veille.
+`
+    )
   })
 
   it('Should produce the same transcript text as openai-whisper given the same parameters', async function () {
-    const transcribeArguments: Parameters<typeof transcriber.transcribe> = [
+    const transcribeParameters: Parameters<typeof transcriber.transcribe> = [
       shortVideoPath,
       { name: 'tiny' },
       'en',
       'txt'
     ]
-    const transcript = await transcriber.transcribe(...transcribeArguments)
+
+    const transcript = await transcriber.transcribe(...transcribeParameters)
+
     const openaiTranscriber = new OpenaiTranscriber(
       {
         name: 'openai-whisper',
@@ -107,10 +144,8 @@ you
       createLogger(),
       join(transcriptDirectory, 'openai-whisper')
     )
-    const openaiTranscript = await openaiTranscriber.transcribe(...transcribeArguments)
+    const openaiTranscript = await openaiTranscriber.transcribe(...transcribeParameters)
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
     expect(await readFile(transcript.path, 'utf8')).to.equal(await readFile(openaiTranscript.path, 'utf8'))
   })
 
