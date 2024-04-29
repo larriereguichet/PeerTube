@@ -1,1 +1,1 @@
-packages/tests/fixtures/transcription/models linguist-generated=true
+packages/tests/fixtures/transcription/models/**/* linguist-generated=true
