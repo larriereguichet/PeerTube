@@ -24,6 +24,7 @@ jobs:
           pip3 install openai-whisper
           pip3 install whisper-ctranslate2
           pip3 install whisper-timestamped
+          pip3 install jiwer
 
       - name: Run transcription tests
         run: |
