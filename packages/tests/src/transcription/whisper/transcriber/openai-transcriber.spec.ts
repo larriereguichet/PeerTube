@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, max-len */
 import { expect, config } from 'chai'
 import { createLogger } from 'winston'
 import { join } from 'path'

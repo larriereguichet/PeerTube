@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions, max-len */
 import { expect, config } from 'chai'
 import { createLogger } from 'winston'
 import { join } from 'path'
@@ -43,7 +43,6 @@ describe('Linto timestamped Whisper transcriber', function () {
       format: 'vtt'
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
 
     // Whisper timestamped should produce a transcript with micro seconds precisions.
@@ -65,7 +64,6 @@ you
       format: 'srt'
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
     expect(await readFile(transcript.path, 'utf8')).to.equal(
       `1
@@ -84,7 +82,6 @@ you
       format: 'txt'
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
     expect(await readFile(transcript.path, 'utf8')).to.equal(`you
 `)
@@ -99,7 +96,6 @@ you
       format: 'txt'
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(existsSync(transcript.path), `Transcript file ${transcript.path} doesn't exist.`).to.be.true
     expect(await readFile(transcript.path, 'utf8')).to.equal(
       `...

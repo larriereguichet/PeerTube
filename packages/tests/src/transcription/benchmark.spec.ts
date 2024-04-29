@@ -20,7 +20,7 @@ interface TestResult {
   CER: number
   duration: number
   engine: TranscriptionEngine
-  dataThroughput: number // relevant ?
+  // dataThroughput: number // relevant ?
   // cpus: CpuInfo[] // https://nodejs.org/docs/latest-v18.x/api/os.html#oscpus
   // cpuUsages: CpuUsage[] // https://nodejs.org/docs/latest-v18.x/api/process.html#processcpuusagepreviousvalue
   // // os.totalmem()

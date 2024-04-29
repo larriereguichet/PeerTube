@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions, no-new */
+/* eslint-disable @typescript-eslint/no-unused-expressions, no-new, max-len */
 import { TranscriptFile, TranscriptFileEvaluator } from '@peertube/peertube-transcription'
 import { buildAbsoluteFixturePath } from '@peertube/peertube-node-utils'
 import { join } from 'path'
