@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import { expect, config } from 'chai'
 import { createLogger } from 'winston'
 import { join } from 'path'
-import { expect, config } from 'chai'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 import { buildAbsoluteFixturePath, root } from '@peertube/peertube-node-utils'
@@ -11,7 +12,7 @@ config.truncateThreshold = 0
 describe('Linto timestamped Whisper transcriber', function () {
   const transcriptDirectory = join(root(), 'test-transcript')
   const shortVideoPath = buildAbsoluteFixturePath('video_short.mp4')
-  const frVideoPath = buildAbsoluteFixturePath('transcription/communiquer-lors-dune-classe-transplantee.mp4')
+  const frVideoPath = buildAbsoluteFixturePath('transcription/videos/communiquer-lors-dune-classe-transplantee.mp4')
   const transcriber = new WhisperTimestampedTranscriber(
     {
       name: 'whisper-timestamped',
