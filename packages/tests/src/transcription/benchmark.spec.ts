@@ -84,23 +84,21 @@ describe('Transcribers benchmark', function () {
   })
 
   transcribers.forEach(function (transcriberName) {
-    describe(`${transcriberName}`, function () {
-      it('Should run a benchmark on each transcriber implementation', async function () {
-        this.timeout(45000)
-        const transcriber = transcriberFactory.createFromEngineName(
-          transcriberName,
-          createLogger(),
-          transcriptDirectory
-        )
-        const transcriptFile = await transcriber.transcribe(mediaFilePath, { name: 'tiny' }, 'fr', 'txt')
-        const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
-        await new Promise(resolve => setTimeout(resolve, 1))
+    it(`Run ${transcriberName} transcriber benchmark without issue`, async function () {
+      this.timeout(45000)
+      const transcriber = transcriberFactory.createFromEngineName(
+        transcriberName,
+        createLogger(),
+        transcriptDirectory
+      )
+      const transcriptFile = await transcriber.transcribe(mediaFilePath, { name: 'tiny' }, 'fr', 'txt')
+      const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
+      await new Promise(resolve => setTimeout(resolve, 1))
 
-        benchmark = benchmarkReducer(benchmark, transcriberName, {
-          engine: transcriber.engine,
-          WER: await evaluator.wer(),
-          CER: await evaluator.cer()
-        })
+      benchmark = benchmarkReducer(benchmark, transcriberName, {
+        engine: transcriber.engine,
+        WER: await evaluator.wer(),
+        CER: await evaluator.cer()
       })
     })
   })

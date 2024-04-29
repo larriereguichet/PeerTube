@@ -35,7 +35,7 @@ describe('Linto timestamped Whisper transcriber', function () {
       'fr'
     )
 
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.vtt'),
       language: 'fr',
       format: 'vtt'
@@ -53,7 +53,7 @@ you
 
   it('May produce a transcript file in the `srt` format with a ms precision', async function () {
     const transcript = await transcriber.transcribe(shortVideoPath, { name: 'tiny' }, 'en', 'srt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.srt'),
       language: 'en',
       format: 'srt'
@@ -70,7 +70,7 @@ you
 
   it('May produce a transcript file in `txt` format', async function () {
     const transcript = await transcriber.transcribe(shortVideoPath, { name: 'tiny' }, 'en', 'txt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.txt'),
       language: 'en',
       format: 'txt'
@@ -83,7 +83,7 @@ you
   it('May transcribe a media file in french', async function () {
     this.timeout(45000)
     const transcript = await transcriber.transcribe(frVideoPath, { name: 'tiny' }, 'fr', 'txt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'communiquer-lors-dune-classe-transplantee.txt'),
       language: 'fr',
       format: 'txt'

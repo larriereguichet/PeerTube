@@ -30,7 +30,7 @@ describe('Whisper CTranslate2 transcriber', function () {
 
   it('Should transcribe a media file and provide a valid path to a transcript file in `vtt` format by default', async function () {
     const transcript = await transcriber.transcribe(shortVideoPath, { name: 'tiny' })
-    expect(transcript.equals(new TranscriptFile({ path: join(transcriptDirectory, 'video_short.vtt') }))).to.be.true
+    expect(await transcript.equals(new TranscriptFile({ path: join(transcriptDirectory, 'video_short.vtt') }))).to.be.true
     expect(await readFile(transcript.path, 'utf8')).to.equal(
       `WEBVTT
 
@@ -43,7 +43,7 @@ You
 
   it('May produce a transcript file in the `srt` format', async function () {
     const transcript = await transcriber.transcribe(shortVideoPath, { name: 'tiny' }, 'en', 'srt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.srt'),
       format: 'srt'
     }))).to.be.true
@@ -59,7 +59,7 @@ You
 
   it('May produce a transcript file in the `txt` format', async function () {
     const transcript = await transcriber.transcribe(shortVideoPath, { name: 'tiny' }, 'en', 'txt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.txt'),
       format: 'txt'
     }))).to.be.true
@@ -71,11 +71,11 @@ You
   it('May transcribe a media file using a local CTranslate2 model', async function () {
     const transcript = await transcriber.transcribe(
       shortVideoPath,
-      { name: 'myLocalModel', path: buildAbsoluteFixturePath('transcription/faster-whisper-tiny') },
+      { name: 'myLocalModel', path: buildAbsoluteFixturePath('transcription/models/faster-whisper-tiny') },
       'en',
       'txt'
     )
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'video_short.txt'),
       format: 'txt'
     }))).to.be.true
@@ -87,7 +87,7 @@ You
   it('May transcribe a media file in french', async function () {
     this.timeout(45000)
     const transcript = await transcriber.transcribe(frVideoPath, { name: 'tiny' }, 'fr', 'txt')
-    expect(transcript.equals(new TranscriptFile({
+    expect(await transcript.equals(new TranscriptFile({
       path: join(transcriptDirectory, 'communiquer-lors-dune-classe-transplantee.txt'),
       language: 'fr',
       format: 'txt'
@@ -128,7 +128,7 @@ Ensuite, il pourront lire et commenter ce de leur camarade, on répondra au comm
     )
     const openaiTranscript = await openaiTranscriber.transcribe(...transcribeArguments)
 
-    expect(transcript.equals(openaiTranscript))
+    expect(await transcript.equals(openaiTranscript))
   })
 
   after(async function () {
