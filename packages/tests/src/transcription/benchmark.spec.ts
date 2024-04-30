@@ -20,6 +20,7 @@ interface TestResult {
   CER: number
   duration: number
   engine: TranscriptionEngine
+  model: string
   // dataThroughput: number // relevant ?
   // cpus: CpuInfo[] // https://nodejs.org/docs/latest-v18.x/api/os.html#oscpus
   // cpuUsages: CpuUsage[] // https://nodejs.org/docs/latest-v18.x/api/process.html#processcpuusagepreviousvalue
@@ -40,12 +41,14 @@ interface FormattedTestResult {
   WER?: string
   CER?: string
   duration?: string
+  model?: string
 }
 
-const formatTestResult = (testResult: Partial<TestResult>): FormattedTestResult => ({
-  WER: testResult.WER ? `${testResult.WER * 100}%` : undefined,
-  CER: testResult.CER ? `${testResult.CER * 100}%` : undefined,
-  duration: testResult.duration ? toHumanReadable(testResult.duration) : undefined
+const formatTestResult = ({ WER, CER, duration, model }: Partial<TestResult>): FormattedTestResult => ({
+  WER: WER ? `${WER * 100}%` : undefined,
+  CER: CER ? `${CER * 100}%` : undefined,
+  duration: duration ? toHumanReadable(duration) : undefined,
+  model
 })
 
 describe('Transcribers benchmark', function () {
@@ -91,14 +94,16 @@ describe('Transcribers benchmark', function () {
         createLogger(),
         transcriptDirectory
       )
-      const transcriptFile = await transcriber.transcribe(mediaFilePath, { name: 'tiny' }, 'fr', 'txt')
+      const model = { name: 'tiny' }
+      const transcriptFile = await transcriber.transcribe(mediaFilePath, model, 'fr', 'txt')
       const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
       await new Promise(resolve => setTimeout(resolve, 1))
 
       benchmark = benchmarkReducer(benchmark, transcriberName, {
         engine: transcriber.engine,
         WER: await evaluator.wer(),
-        CER: await evaluator.cer()
+        CER: await evaluator.cer(),
+        model: model.name
       })
     })
   })
