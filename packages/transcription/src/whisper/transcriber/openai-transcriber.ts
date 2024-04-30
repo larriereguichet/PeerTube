@@ -12,12 +12,12 @@ export class OpenaiTranscriber extends AbstractTranscriber {
     language: string = 'en',
     format: TranscriptFormat = 'vtt'
   ): Promise<TranscriptFile> {
-    this.createPerformanceMark()
     // Shall we run the command with `{ shell: true }` to get the same error as in sh ?
     // ex: ENOENT => Command not found
     const $$ = $({ verbose: true })
     const { baseName } = getFileInfo(mediaFilePath)
 
+    this.startRun(model)
     await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
@@ -29,8 +29,7 @@ export class OpenaiTranscriber extends AbstractTranscriber {
       '--language',
       language
     ]}`
-
-    this.measurePerformanceMark()
+    this.stopRun()
 
     return new TranscriptFile({
       language,

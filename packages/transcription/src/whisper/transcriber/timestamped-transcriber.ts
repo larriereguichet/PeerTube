@@ -15,10 +15,10 @@ export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
     language: string,
     format: TranscriptFormat = 'vtt'
   ): Promise<TranscriptFile> {
-    this.createPerformanceMark()
-
     const $$ = $({ verbose: true })
     const { baseName, name } = getFileInfo(mediaFilePath)
+
+    this.startRun(model)
     await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
@@ -28,14 +28,13 @@ export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
       '--output_dir',
       this.transcriptDirectory
     ]}`
+    this.stopRun()
 
     const internalTranscriptPath = join(this.transcriptDirectory, `${name}.${format}`)
     const transcriptPath = join(this.transcriptDirectory, `${baseName}.${format}`)
     // Whisper timestamped is supposed to output file with the video file extension ex: video.mp4.vtt
     assert(existsSync(internalTranscriptPath), `${internalTranscriptPath} file doesn't exist.`)
     await rename(internalTranscriptPath, transcriptPath)
-
-    this.measurePerformanceMark()
 
     return new TranscriptFile({
       language,

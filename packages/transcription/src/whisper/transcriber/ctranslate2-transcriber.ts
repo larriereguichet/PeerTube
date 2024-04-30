@@ -15,7 +15,6 @@ export class Ctranslate2Transcriber extends OpenaiTranscriber {
     language: string = 'en',
     format: TranscriptFormat = 'vtt'
   ): Promise<TranscriptFile> {
-    this.createPerformanceMark()
     // Shall we run the command with `{ shell: true }` to get the same error as in sh ?
     // ex: ENOENT => Command not found
     const $$ = $({ verbose: true })
@@ -26,6 +25,7 @@ export class Ctranslate2Transcriber extends OpenaiTranscriber {
     }
     const modelArgs = model.path ? [ '--model_directory', model.path ] : [ '--model', model.name ]
 
+    this.startRun(model)
     await $$`${this.engine.binary} ${[
       mediaFilePath,
       ...modelArgs,
@@ -36,8 +36,7 @@ export class Ctranslate2Transcriber extends OpenaiTranscriber {
       '--language',
       language
     ]}`
-
-    this.measurePerformanceMark()
+    this.stopRun()
 
     return new TranscriptFile({
       language,
