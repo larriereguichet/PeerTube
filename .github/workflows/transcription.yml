@@ -29,3 +29,8 @@ jobs:
       - name: Run transcription tests
         run: |
           npm run mocha -- --exit --bail "packages/tests/src/transcription/**/*.spec.ts"
+          cat /proc/cpuinfo
+          lscpu
+          dmidecode --type processor
+          lshw -C CPU
+          hwinfo --cpu
