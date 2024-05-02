@@ -1,4 +1,5 @@
 import { $ } from 'execa'
+import short, { UUID } from 'short-uuid'
 import assert from 'node:assert'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
@@ -13,12 +14,14 @@ export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
     mediaFilePath: string,
     model: TranscriptionModel,
     language: string,
-    format: TranscriptFormat = 'vtt'
+    format: TranscriptFormat = 'vtt',
+    runId: UUID = short.uuid()
   ): Promise<TranscriptFile> {
     const $$ = $({ verbose: true })
     const { baseName, name } = getFileInfo(mediaFilePath)
 
-    this.startRun(model)
+    this.createRun(model, runId)
+    this.startRun()
     await $$`${this.engine.binary} ${[
       mediaFilePath,
       '--model',
@@ -32,7 +35,8 @@ export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
 
     const internalTranscriptPath = join(this.transcriptDirectory, `${name}.${format}`)
     const transcriptPath = join(this.transcriptDirectory, `${baseName}.${format}`)
-    // Whisper timestamped is supposed to output file with the video file extension ex: video.mp4.vtt
+    // Whisper timestamped output files with the video file extension by defaults, ex: video.mp4.vtt
+    // @see https://github.com/linto-ai/whisper-timestamped/issues/189
     assert(existsSync(internalTranscriptPath), `${internalTranscriptPath} file doesn't exist.`)
     await rename(internalTranscriptPath, transcriptPath)
 

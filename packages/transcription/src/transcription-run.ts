@@ -1,31 +1,34 @@
-import short from 'short-uuid'
+import short, { UUID } from 'short-uuid'
 import { createLogger, Logger } from 'winston'
 import { TranscriptionModel } from './transcription-model.js'
 import { TranscriptionEngine } from './transcription-engine.js'
 
 export class TranscriptionRun {
-  id: string
+  uuid: UUID
   engine: TranscriptionEngine
   model: TranscriptionModel
   logger: Logger
 
-  static RUN_ID_MASK = /^([a-zA-Z0-9-]+)_([a-zA-Z0-9-]+)_([a-zA-Z0-9-/]+)/gm
+  static RUN_ID_MASK = /^([a-z0-9-]+)_([a-z0-9-]+)_([a-z0-9-/]+)/i
 
-  constructor (engine: TranscriptionEngine, model: TranscriptionModel, logger = createLogger()) {
+  constructor (engine: TranscriptionEngine, model: TranscriptionModel, logger = createLogger(), uuid?: UUID) {
+    this.uuid = uuid
     this.engine = engine
     this.model = model
-
-    this.id = TranscriptionRun.createId(engine, model)
     this.logger = logger
   }
 
-  static createId (engine: TranscriptionEngine, model: TranscriptionModel) {
-    return `${short.uuid()}_${engine.name}_${model.name}`
+  static createId (engine: TranscriptionEngine, model: TranscriptionModel, uuid = short.uuid()) {
+    return `${uuid}_${engine.name}_${model.name}`
   }
 
   static extractFromId (runId: string) {
-    const [ , id, engineName, modelName ] = TranscriptionRun.RUN_ID_MASK.exec(runId)
-    return { id, engineName, modelName }
+    const [ , uuid, engineName, modelName ] = TranscriptionRun.RUN_ID_MASK.exec(runId)
+    return { uuid, engineName, modelName }
+  }
+
+  get runId () {
+    return TranscriptionRun.createId(this.engine, this.model, this.uuid)
   }
 
   start () {
@@ -36,7 +39,7 @@ export class TranscriptionRun {
     try {
       performance.mark(this.getEndPerformanceMarkName())
       performance.measure(
-        this.id,
+        this.runId,
         this.getStartPerformanceMarkName(),
         this.getEndPerformanceMarkName()
       )
@@ -46,10 +49,10 @@ export class TranscriptionRun {
   }
 
   getStartPerformanceMarkName () {
-    return `${this.id}-started`
+    return `${this.runId}-started`
   }
 
   getEndPerformanceMarkName () {
-    return `${this.id}-ended`
+    return `${this.runId}-ended`
   }
 }

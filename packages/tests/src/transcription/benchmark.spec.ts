@@ -1,4 +1,5 @@
 import { createLogger } from 'winston'
+import short, { UUID } from 'short-uuid'
 import { performance, PerformanceObserver } from 'node:perf_hooks'
 // import { CpuInfo, CpuUsage } from 'node:os'
 import { rm, mkdir } from 'node:fs/promises'
@@ -8,11 +9,8 @@ import {
   transcriberFactory,
   TranscriptFile,
   TranscriptFileEvaluator,
-  TranscriptionEngine
+  TranscriptionEngine, TranscriptionRun
 } from '@peertube/peertube-transcription'
-
-const WER_TOLERANCE = 0.01
-const CER_TOLERANCE = 0.001
 
 interface TestResult {
   uuid: string
@@ -29,10 +27,12 @@ interface TestResult {
   // memoryUsages: Record<number, MemoryUsage> // https://nodejs.org/docs/latest-v18.x/api/process.html#processmemoryusage
 }
 
-const benchmarkReducer = (benchmark: Record<string, Partial<TestResult>> = {}, engineName: string, testResult: Partial<TestResult>) => ({
+type Benchmark = Record<UUID, Partial<TestResult>>
+
+const benchmarkReducer = (benchmark: Benchmark = {}, uuid: string, testResult: Partial<TestResult>) => ({
   ...benchmark,
-  [engineName]:  {
-    ...benchmark[engineName],
+  [uuid]:  {
+    ...benchmark[uuid],
     ...testResult
   }
 })
@@ -57,6 +57,10 @@ describe('Transcribers benchmark', function () {
     'whisper-ctranslate2',
     'whisper-timestamped'
   ]
+  const models = [
+    'tiny',
+    'small'
+  ]
 
   const transcriptDirectory = buildAbsoluteFixturePath('transcription/benchmark/')
   const mediaFilePath = buildAbsoluteFixturePath('transcription/videos/communiquer-lors-dune-classe-transplantee.mp4')
@@ -75,10 +79,9 @@ describe('Transcribers benchmark', function () {
       items
         .getEntries()
         .forEach((entry) => {
-          const engineName = transcribers.find(transcriberName => entry.name.includes(transcriberName))
+          const { uuid } = TranscriptionRun.extractFromId(entry.name)
 
-          benchmark = benchmarkReducer(benchmark, engineName, {
-            uuid: entry.name,
+          benchmark = benchmarkReducer(benchmark, uuid, {
             duration: entry.duration
           })
         })
@@ -87,23 +90,29 @@ describe('Transcribers benchmark', function () {
   })
 
   transcribers.forEach(function (transcriberName) {
-    it(`Run ${transcriberName} transcriber benchmark without issue`, async function () {
-      this.timeout(45000)
+    describe(`Creates a ${transcriberName} transcriber for the benchmark`, function () {
       const transcriber = transcriberFactory.createFromEngineName(
         transcriberName,
         createLogger(),
         transcriptDirectory
       )
-      const model = { name: 'tiny' }
-      const transcriptFile = await transcriber.transcribe(mediaFilePath, model, 'fr', 'txt')
-      const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
-      await new Promise(resolve => setTimeout(resolve, 1))
 
-      benchmark = benchmarkReducer(benchmark, transcriberName, {
-        engine: transcriber.engine,
-        WER: await evaluator.wer(),
-        CER: await evaluator.cer(),
-        model: model.name
+      models.forEach((modelName) => {
+        it(`Run ${transcriberName} transcriber benchmark with ${modelName} model`, async function () {
+          this.timeout(1000000)
+          const model = { name: modelName }
+          const uuid = short.uuid()
+          const transcriptFile = await transcriber.transcribe(mediaFilePath, model, 'fr', 'txt', uuid)
+          const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
+          await new Promise(resolve => setTimeout(resolve, 1))
+
+          benchmark = benchmarkReducer(benchmark, uuid, {
+            engine: transcriber.engine,
+            WER: await evaluator.wer(),
+            CER: await evaluator.cer(),
+            model: model.name
+          })
+        })
       })
     })
   })
