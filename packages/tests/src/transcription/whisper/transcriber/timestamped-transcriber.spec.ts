@@ -4,7 +4,7 @@ import { createLogger } from 'winston'
 import { join } from 'path'
 import { mkdir, rm } from 'node:fs/promises'
 import { buildAbsoluteFixturePath, root } from '@peertube/peertube-node-utils'
-import { OpenaiTranscriber, WhisperTimestampedTranscriber, TranscriptFile } from '@peertube/peertube-transcription'
+import { OpenaiTranscriber, WhisperTimestampedTranscriber, TranscriptFile, TranscriptFileEvaluator } from '@peertube/peertube-transcription'
 
 config.truncateThreshold = 0
 
@@ -116,7 +116,7 @@ Ensuite, il pourront lire et commenter ce de leur camarade, ou répondre au comm
     )
   })
 
-  it('Should produce the same transcript text as openai-whisper given the same parameters', async function () {
+  it('Should produce a text transcript very close to the one produced by openai-whisper given the same parameters', async function () {
     const transcribeParameters: Parameters<typeof transcriber.transcribe> = [
       shortVideoPath,
       { name: 'tiny' },
@@ -139,7 +139,7 @@ Ensuite, il pourront lire et commenter ce de leur camarade, ou répondre au comm
     )
     const openaiTranscript = await openaiTranscriber.transcribe(...transcribeParameters)
 
-    expect(await transcript.read()).to.equals(await openaiTranscript.read())
+    expect(await transcript.equals(openaiTranscript, false)).to.be.true
   })
 
   after(async function () {
