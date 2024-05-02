@@ -44,17 +44,25 @@ import { OpenaiTranscriber } from '@peertube/peertube-transcription'
 })();
 ```
 
+Using a local model file:
+```typescript
+  const transcriptFile = await transcriber.transcribe(
+    './myVideo.mp4',
+    { name: 'my fine tuned large model', path: './models/large.pt' },
+    'en', 'txt'
+  );
+```
+
 You may use the builtin Factory if you're happy with the default configuration:
 ```Typescript
 import { transcriberFactory } from '@peertube/peertube-transcription'
 transcriberFactory.createFromEngineName('openai-whisper')
 ```
-
-> For more use-case see [../tests/src/transcription/whisper/transcriber/openai-transcriber.spec.ts](../tests/src/transcription/whisper/transcriber/openai-transcriber.spec.ts)
+> For further usage [../tests/src/transcription/whisper/transcriber/openai-transcriber.spec.ts](../tests/src/transcription/whisper/transcriber/openai-transcriber.spec.ts)
 
 ## Lexicon
-- ONNX: Open Neural Network eXchange. A spec. ONNX Runtime run these models
-- GPTs: generative pre-trained transformers
+- ONNX: Open Neural Network eXchange. A specification, the ONNX Runtime run these models.
+- GPTs: Generative Pre-Trained Transformers
 - LLM: Large Language Models
 - NLP: Natural Language Processing
 - MLP: Multilayer Perceptron
