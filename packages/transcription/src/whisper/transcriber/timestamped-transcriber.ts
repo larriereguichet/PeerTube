@@ -1,5 +1,5 @@
 import { $ } from 'execa'
-import short, { UUID } from 'short-uuid'
+import short, { SUUID } from 'short-uuid'
 import assert from 'node:assert'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
@@ -15,12 +15,12 @@ export class WhisperTimestampedTranscriber extends OpenaiTranscriber {
     model: TranscriptionModel,
     language: string,
     format: TranscriptFormat = 'vtt',
-    runId: UUID = short.uuid()
+    runId: SUUID = short.generate()
   ): Promise<TranscriptFile> {
     const $$ = $({ verbose: true })
     const { baseName, name } = getFileInfo(mediaFilePath)
 
-    this.createRun(model, runId)
+    this.createRun(runId)
     this.startRun()
     await $$`${this.engine.binary} ${[
       mediaFilePath,

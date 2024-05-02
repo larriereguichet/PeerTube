@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { $ } from 'execa'
-import short, { UUID } from 'short-uuid'
+import short, { SUUID } from 'short-uuid'
 import { TranscriptionModel } from '../../transcription-model.js'
 import { TranscriptFile, TranscriptFormat } from '../../transcript/index.js'
 import { AbstractTranscriber } from '../../abstract-transcriber.js'
@@ -12,14 +12,14 @@ export class OpenaiTranscriber extends AbstractTranscriber {
     model: TranscriptionModel = { name: 'tiny' },
     language: string = 'en',
     format: TranscriptFormat = 'vtt',
-    runId: UUID = short.uuid()
+    runId: SUUID = short.generate()
   ): Promise<TranscriptFile> {
     // Shall we run the command with `{ shell: true }` to get the same error as in sh ?
     // ex: ENOENT => Command not found
     const $$ = $({ verbose: true })
     const { baseName } = getFileInfo(mediaFilePath)
 
-    this.createRun(model, runId)
+    this.createRun(runId)
     this.startRun()
     await $$`${this.engine.binary} ${[
       mediaFilePath,

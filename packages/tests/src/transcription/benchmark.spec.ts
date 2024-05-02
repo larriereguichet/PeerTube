@@ -1,5 +1,5 @@
 import { createLogger } from 'winston'
-import short, { UUID } from 'short-uuid'
+import short, { SUUID } from 'short-uuid'
 import { performance, PerformanceObserver } from 'node:perf_hooks'
 // import { CpuInfo, CpuUsage } from 'node:os'
 import { rm, mkdir } from 'node:fs/promises'
@@ -9,16 +9,16 @@ import {
   transcriberFactory,
   TranscriptFile,
   TranscriptFileEvaluator,
-  TranscriptionEngine, TranscriptionRun
+  TranscriptionEngine
 } from '@peertube/peertube-transcription'
 
 interface TestResult {
-  uuid: string
-  WER: number
-  CER: number
-  duration: number
-  engine: TranscriptionEngine
-  model: string
+  uuid: SUUID
+  WER?: number
+  CER?: number
+  duration?: number
+  engine?: TranscriptionEngine
+  model?: string
   // dataThroughput: number // relevant ?
   // cpus: CpuInfo[] // https://nodejs.org/docs/latest-v18.x/api/os.html#oscpus
   // cpuUsages: CpuUsage[] // https://nodejs.org/docs/latest-v18.x/api/process.html#processcpuusagepreviousvalue
@@ -27,12 +27,12 @@ interface TestResult {
   // memoryUsages: Record<number, MemoryUsage> // https://nodejs.org/docs/latest-v18.x/api/process.html#processmemoryusage
 }
 
-type Benchmark = Record<UUID, Partial<TestResult>>
+type Benchmark = Record<SUUID, TestResult>
 
-const benchmarkReducer = (benchmark: Benchmark = {}, uuid: string, testResult: Partial<TestResult>) => ({
+const benchmarkReducer = (benchmark: Benchmark = {}, testResult: TestResult) => ({
   ...benchmark,
-  [uuid]:  {
-    ...benchmark[uuid],
+  [testResult.uuid]:  {
+    ...benchmark[testResult.uuid],
     ...testResult
   }
 })
@@ -42,13 +42,15 @@ interface FormattedTestResult {
   CER?: string
   duration?: string
   model?: string
+  engine?: string
 }
 
-const formatTestResult = ({ WER, CER, duration, model }: Partial<TestResult>): FormattedTestResult => ({
+const formatTestResult = ({ WER, CER, duration, engine, model }: Partial<TestResult>): FormattedTestResult => ({
   WER: WER ? `${WER * 100}%` : undefined,
   CER: CER ? `${CER * 100}%` : undefined,
   duration: duration ? toHumanReadable(duration) : undefined,
-  model
+  model,
+  engine: engine.name
 })
 
 describe('Transcribers benchmark', function () {
@@ -70,7 +72,7 @@ describe('Transcribers benchmark', function () {
     format: 'txt'
   })
 
-  let benchmark: Record<string, Partial<TestResult>> = {}
+  let benchmark: Record<string, TestResult> = {}
 
   before(async function () {
     await mkdir(transcriptDirectory, { recursive: true })
@@ -79,9 +81,8 @@ describe('Transcribers benchmark', function () {
       items
         .getEntries()
         .forEach((entry) => {
-          const { uuid } = TranscriptionRun.extractFromId(entry.name)
-
-          benchmark = benchmarkReducer(benchmark, uuid, {
+          benchmark = benchmarkReducer(benchmark, {
+            uuid: entry.name as SUUID,
             duration: entry.duration
           })
         })
@@ -99,14 +100,15 @@ describe('Transcribers benchmark', function () {
 
       models.forEach((modelName) => {
         it(`Run ${transcriberName} transcriber benchmark with ${modelName} model`, async function () {
-          this.timeout(1000000)
+          this.timeout(15 * 1000 * 60) // 15 minutes
           const model = { name: modelName }
-          const uuid = short.uuid()
+          const uuid = short.generate()
           const transcriptFile = await transcriber.transcribe(mediaFilePath, model, 'fr', 'txt', uuid)
           const evaluator = new TranscriptFileEvaluator(referenceTranscriptFile, transcriptFile)
           await new Promise(resolve => setTimeout(resolve, 1))
 
-          benchmark = benchmarkReducer(benchmark, uuid, {
+          benchmark = benchmarkReducer(benchmark, {
+            uuid,
             engine: transcriber.engine,
             WER: await evaluator.wer(),
             CER: await evaluator.cer(),
@@ -118,14 +120,16 @@ describe('Transcribers benchmark', function () {
   })
 
   after(async function () {
-    console.table(
-      Object
+    const benchmarksGroupedByModel = Object
         .keys(benchmark)
-        .reduce((formattedBenchmark, engineName, currentIndex, array) => ({
-          ...formattedBenchmark,
-          [engineName]: formatTestResult(benchmark[engineName])
+        .reduce((benchmarksGroupedByModel, uuid, currentIndex, array) => ({
+          ...benchmarksGroupedByModel,
+          [benchmark[uuid].model]: {
+            ...benchmarksGroupedByModel[benchmark[uuid].model],
+            [uuid]: formatTestResult(benchmark[uuid])
+          }
         }), {})
-    )
+    Object.values(benchmarksGroupedByModel).forEach(benchmark => console.table(benchmark))
 
     await rm(transcriptDirectory, { recursive: true, force: true })
 

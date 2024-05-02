@@ -1,5 +1,5 @@
 import { $ } from 'execa'
-import short, { UUID } from 'short-uuid'
+import short, { SUUID } from 'short-uuid'
 import { join } from 'path'
 import { lstat } from 'node:fs/promises'
 import { OpenaiTranscriber } from './openai-transcriber.js'
@@ -13,7 +13,7 @@ export class Ctranslate2Transcriber extends OpenaiTranscriber {
     model: TranscriptionModel = { name: 'tiny' },
     language: string = 'en',
     format: TranscriptFormat = 'vtt',
-    runId: UUID = short.uuid()
+    runId: SUUID = short.generate()
   ): Promise<TranscriptFile> {
     // Shall we run the command with `{ shell: true }` to get the same error as in sh ?
     // ex: ENOENT => Command not found
@@ -25,7 +25,7 @@ export class Ctranslate2Transcriber extends OpenaiTranscriber {
     }
     const modelArgs = model.path ? [ '--model_directory', model.path ] : [ '--model', model.name ]
 
-    this.createRun(model, runId)
+    this.createRun(runId)
     this.startRun()
     await $$`${this.engine.binary} ${[
       mediaFilePath,

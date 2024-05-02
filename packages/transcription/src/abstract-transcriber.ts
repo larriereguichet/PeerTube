@@ -1,5 +1,5 @@
 import { createLogger, Logger } from 'winston'
-import short, { UUID } from 'short-uuid'
+import short, { SUUID } from 'short-uuid'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { PerformanceObserver } from 'node:perf_hooks'
@@ -30,8 +30,8 @@ export abstract class AbstractTranscriber {
     this.performanceObserver = performanceObserver
   }
 
-  createRun (model: TranscriptionModel, uuid = short.uuid()) {
-    this.run = new TranscriptionRun(this.engine, model, this.logger, uuid)
+  createRun (uuid: SUUID = short.generate()) {
+    this.run = new TranscriptionRun(this.logger, uuid)
   }
 
   startRun () {
@@ -60,6 +60,6 @@ export abstract class AbstractTranscriber {
     model: TranscriptionModel,
     language: string,
     format: TranscriptFormat,
-    runId: UUID
+    runId: SUUID
   ): Promise<TranscriptFile>
 }
