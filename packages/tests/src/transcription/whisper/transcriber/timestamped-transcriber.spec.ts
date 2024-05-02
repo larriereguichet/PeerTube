@@ -4,7 +4,7 @@ import { createLogger } from 'winston'
 import { join } from 'path'
 import { mkdir, rm } from 'node:fs/promises'
 import { buildAbsoluteFixturePath, root } from '@peertube/peertube-node-utils'
-import { OpenaiTranscriber, WhisperTimestampedTranscriber, TranscriptFile, TranscriptFileEvaluator } from '@peertube/peertube-transcription'
+import { OpenaiTranscriber, WhisperTimestampedTranscriber, TranscriptFile } from '@peertube/peertube-transcription'
 
 config.truncateThreshold = 0
 
