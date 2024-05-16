@@ -59,6 +59,7 @@
     "generate-types-package": "tsx --conditions=peertube:tsx ./packages/types-generator/generate-package.ts",
     "i18n:create-custom-files": "tsx --tsconfig ./scripts/tsconfig.json --conditions=peertube:tsx ./scripts/i18n/create-custom-files.ts",
     "benchmark-server": "tsx --conditions=peertube:tsx ./scripts/benchmark.ts",
+    "benchmark-transcription": "tsx --conditions=peertube:tsx --tsconfig ./packages/transcription/tsconfig.json ./packages/transcription/src/benchmark.ts",
     "client:build-stats": "tsx --conditions=peertube:tsx ./scripts/client-build-stats.ts",
     "generate-code-contributors": "tsx --conditions=peertube:tsx ./scripts/generate-code-contributors.ts",
     "simulate-many-viewers": "tsx --conditions=peertube:tsx ./scripts/simulate-many-viewers.ts",
